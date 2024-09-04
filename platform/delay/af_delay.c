@@ -22,7 +22,7 @@ void af_delay_ms(volatile unsigned long ms) {
     SysTick->VAL  = 0X00;     /* 清空计数器 */
 }
 
-void a_delay_us(volatile unsigned long us) {
+void af_delay_us(volatile unsigned long us) {
     /* SYSTICK分频--1us的系统时钟中断 */
     if (SysTick_Config(SystemCoreClock / 1000000)) {
         while (1) {};

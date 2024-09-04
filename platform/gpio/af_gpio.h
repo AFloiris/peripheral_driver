@@ -5,19 +5,30 @@
 
 typedef struct af_gpio    af_gpio_t;
 typedef enum af_gpio_mode af_gpio_mode_t;
+typedef enum af_gpio_pull af_gpio_pull_t;
 
-enum af_gpio_mode {                      /* 引脚模式 */
-                    AF_GPIO_MODE_INPUT,  /* 输入模式 */
-                    AF_GPIO_MODE_OUTPUT, /* 输出模式 */
+enum af_gpio_mode {                         /* 引脚模式 */
+                    AF_GPIO_MODE_INPUT,     /* 输入模式 */
+                    AF_GPIO_MODE_OUTPUT_OD, /* 开漏输出模式 */
+                    AF_GPIO_MODE_OUTPUT_PP, /* 推挽输出模式 */
+};
+
+enum af_gpio_pull {
+    AF_GPIO_PULL_NONE, /* 无上拉/下拉 */
+    AF_GPIO_PULL_UP,   /* 上拉 */
+    AF_GPIO_PULL_DOWN, /* 下拉 */
 };
 
 struct af_gpio {
-#if defined(USE_HAL_DRIVER) || defined(USE_STDPERIPH_DRIVER) /* STM32 系列 HAL库/标准库 */
-    GPIO_TypeDef *port;
-    uint16_t      pin;
-#endif
-    af_gpio_mode_t mode; /* gpio 模式 */
     uint8_t        init; /* gpio 初始化状态 */
+    af_gpio_mode_t mode; /* gpio 模式 */
+    af_gpio_pull_t pull; /* gpio 上拉/下拉 */
+
+#if defined(USE_HAL_DRIVER) || defined(USE_STDPERIPH_DRIVER) /* STM32 系列 HAL库/标准库 */
+    GPIO_TypeDef    *port;
+    uint16_t         pin;
+    GPIO_InitTypeDef init_struct;
+#endif
 };
 
 /**

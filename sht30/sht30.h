@@ -1,23 +1,17 @@
 #ifndef __AF_SHT30_H__
 #define __AF_SHT30_H__
 
+#include "af_i2c.h"
 #include "main.h"
 
 typedef struct sht30_dev sht30_dev_t;
-typedef struct sht30_i2c sht30_i2c_t;
-
-struct sht30_i2c { /* i2c 配置，平台相关 */
-#if defined(USE_HAL_DRIVER)
-    I2C_HandleTypeDef *hi2c;
-#endif
-};
 
 struct sht30_dev {
-    uint8_t     addr;        /* i2c 地址 */
-    uint8_t     data[6];     /* 接收到的数据 */
-    float       temperature; /* 温度 */
-    float       humidity;    /* 湿度 */
-    sht30_i2c_t i2c;         /* i2c 配置 */
+    uint8_t  addr;        /* i2c 地址 */
+    uint8_t  data[6];     /* 接收到的数据 */
+    float    temperature; /* 温度 */
+    float    humidity;    /* 湿度 */
+    af_i2c_t i2c;         /* i2c 配置 */
 };
 
 /**
@@ -27,7 +21,7 @@ struct sht30_dev {
  * @param addr  i2c 地址
  * @return sht30_dev_t* sht30 设备
  */
-sht30_dev_t *sht30_open(sht30_i2c_t i2c, uint8_t addr);
+sht30_dev_t *sht30_open(af_i2c_t i2c, uint8_t addr);
 
 /**
  * @brief 关闭 sht30 设备
