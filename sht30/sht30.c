@@ -12,7 +12,7 @@
  */
 static void sht30_i2c_read(sht30_dev_t *dev, uint8_t *data, uint16_t len)
 {
-    af_i2c_read(&dev->i2c, dev->addr, data, len);
+    af_i2c_read(&dev->i2c, dev->addr << 1 | 0x01, data, len);
 }
 
 /**
@@ -22,9 +22,9 @@ static void sht30_i2c_read(sht30_dev_t *dev, uint8_t *data, uint16_t len)
  * @param data 数据
  * @param len  数据长度
  */
-static void sht30_i2c_write(sht30_dev_t *dev,uint8_t *data, uint16_t len)
+static void sht30_i2c_write(sht30_dev_t *dev, uint8_t *data, uint16_t len)
 {
-    af_i2c_write(&dev->i2c, dev->addr,data, len);
+    af_i2c_write(&dev->i2c, dev->addr << 1 | 0x00, data, len);
 }
 
 /**
@@ -37,8 +37,8 @@ static void sht30_i2c_write(sht30_dev_t *dev,uint8_t *data, uint16_t len)
  */
 static uint8_t sht30_check_crc(uint8_t *data, uint8_t size, uint8_t check)
 {
-    uint8_t       crc = 0xFF;
-    uint8_t       bit = 0;
+    uint8_t       crc        = 0xFF;
+    uint8_t       bit        = 0;
     const int16_t POLYNOMIAL = 0x131;
     for (uint8_t i = 0; i < size; ++i)
     {
@@ -58,38 +58,6 @@ static uint8_t sht30_check_crc(uint8_t *data, uint8_t size, uint8_t check)
         return 0;
 }
 
-/**
- * @brief 计算温度
- * @note  驱动相关
- * @param data 读取到的原始温度数据
- * @return 计算后的温度值
- */
-static float sht30_calc_temperature(uint16_t data)
-{
-    float temperature = 0;
-
-    data &= ~0x0003;
-    temperature = (175 * (float)data / 65535 - 45); // T = -45 + 175 * rawValue / (2^16-1)
-
-    return temperature;
-}
-
-/**
- * @brief 计算湿度
- * @note  驱动相关
- * @param data 读取到的原始湿度数据
- * @return 计算后的湿度值
- */
-static float sht30_calc_humidity(uint16_t data)
-{
-    float humidity = 0;
-
-    data &= ~0x0003;
-    humidity = (100 * (float)data / 65535); // RH = rawValue / (2^16-1) * 10
-
-    return humidity;
-}
-
 sht30_dev_t *sht30_open(af_i2c_t i2c, uint8_t addr)
 {
     sht30_dev_t *dev = (sht30_dev_t *)malloc(sizeof(sht30_dev_t));
@@ -99,10 +67,7 @@ sht30_dev_t *sht30_open(af_i2c_t i2c, uint8_t addr)
         dev->i2c  = i2c;
         dev->addr = addr;
     }
-    if (dev->i2c.init == 0)
-    {
-        af_i2c_init(&dev->i2c);
-    }
+    if (dev->i2c.init == 0) { af_i2c_init(&dev->i2c); }
     return dev;
 }
 
@@ -114,16 +79,14 @@ void sht30_close(sht30_dev_t *dev)
     free(dev);
 }
 
-
-
 uint8_t sht30_read(sht30_dev_t *dev)
 {
     if (dev == NULL) return 1;
 
-    uint16_t ret = 0;
-    uint8_t  cmd[2] = {0xE0, 0x00};
+    uint16_t ret    = 0;
+    uint8_t  cmd[2] = {0x2C, 0x06};
 
-    /* 发送 0xE0 0x00 命令 */
+    /* 发送 0x2C 0x06 命令 */
     sht30_i2c_write(dev, cmd, 2);
 
     /* 读取 6 个字节的数据 */
