@@ -7,30 +7,40 @@ volatile unsigned long af_time_delay;
 /**
  * @brief 使用系统滴答定时器实现延时功能,注意冲突
  */
-void SysTick_Handler() {
-    if (af_time_delay) af_time_delay--;
+void SysTick_Handler()
+{
+    if (af_time_delay)
+        af_time_delay--;
 }
 
-void af_delay_ms(volatile unsigned long ms) {
+void af_delay_ms(volatile unsigned long ms)
+{
     /* SYSTICK分频--1ms的系统时钟中断 */
-    if (SysTick_Config(SystemCoreClock / 1000)) {
-        while (1) {};
+    if (SysTick_Config(SystemCoreClock / 1000))
+    {
+        while (1)
+        {};
     }
-    af_time_delay = ms;       /* 读取定时时间 */
-    while (af_time_delay) {}; /* 循环等待时间到达 */
-    SysTick->CTRL = 0x00;     /* 关闭计数器 */
-    SysTick->VAL  = 0X00;     /* 清空计数器 */
+    af_time_delay = ms; /* 读取定时时间 */
+    while (af_time_delay)
+    {};                   /* 循环等待时间到达 */
+    SysTick->CTRL = 0x00; /* 关闭计数器 */
+    SysTick->VAL  = 0X00; /* 清空计数器 */
 }
 
-void af_delay_us(volatile unsigned long us) {
+void af_delay_us(volatile unsigned long us)
+{
     /* SYSTICK分频--1us的系统时钟中断 */
-    if (SysTick_Config(SystemCoreClock / 1000000)) {
-        while (1) {};
+    if (SysTick_Config(SystemCoreClock / 1000000))
+    {
+        while (1)
+        {};
     }
-    af_time_delay = us;       /* 读取定时时间 */
-    while (af_time_delay) {}; /* 循环等待时间到达 */
-    SysTick->CTRL = 0x00;     /* 关闭计数器 */
-    SysTick->VAL  = 0X00;     /* 清空计数器 */
+    af_time_delay = us; /* 读取定时时间 */
+    while (af_time_delay)
+    {};                   /* 循环等待时间到达 */
+    SysTick->CTRL = 0x00; /* 关闭计数器 */
+    SysTick->VAL  = 0X00; /* 清空计数器 */
 }
 
 /* 以下为使用了FreeRTOS的延时函数 */

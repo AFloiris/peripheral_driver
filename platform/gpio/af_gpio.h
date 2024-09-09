@@ -3,9 +3,10 @@
 
 #include "main.h"
 
-typedef struct af_gpio    af_gpio_t;
-typedef enum af_gpio_mode af_gpio_mode_t;
-typedef enum af_gpio_pull af_gpio_pull_t;
+typedef struct af_gpio     af_gpio_t;
+typedef enum af_gpio_mode  af_gpio_mode_t;
+typedef enum af_gpio_pull  af_gpio_pull_t;
+typedef enum af_gpio_speed af_gpio_speed_t;
 
 enum af_gpio_mode {                         /* 引脚模式 */
                     AF_GPIO_MODE_INPUT,     /* 输入模式 */
@@ -19,15 +20,22 @@ enum af_gpio_pull {
     AF_GPIO_PULL_DOWN, /* 下拉 */
 };
 
+enum af_gpio_speed {
+    AF_GPIO_SPEED_LOW,    /* 低速 */
+    AF_GPIO_SPEED_MEDIUM, /* 中速 */
+    AF_GPIO_SPEED_HIGH,   /* 高速 */
+};
+
 struct af_gpio {
-    uint8_t        init; /* gpio 初始化状态 */
-    af_gpio_mode_t mode; /* gpio 模式 */
-    af_gpio_pull_t pull; /* gpio 上拉/下拉 */
+    uint8_t         init;  /* gpio 初始化状态 */
+    af_gpio_mode_t  mode;  /* gpio 模式 */
+    af_gpio_pull_t  pull;  /* gpio 上拉/下拉 */
+    af_gpio_speed_t speed; /* gpio 速度 */
 
 #if defined(USE_HAL_DRIVER) || defined(USE_STDPERIPH_DRIVER) /* STM32 系列 HAL库/标准库 */
     GPIO_TypeDef    *port;
     uint16_t         pin;
-    GPIO_InitTypeDef init_struct;
+    GPIO_InitTypeDef gpio_init;
 #endif
 };
 

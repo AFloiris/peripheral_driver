@@ -4,14 +4,13 @@
 #include "af_gpio.h"
 #include "main.h"
 
-
 typedef struct dht11_device dht11_device_t;
 
-struct dht11_device {       /* DHT11 设备 */
-    uint8_t    data[5];     /* 接收到的数据 */
-    float      temperature; /* 温度 */
-    float      humidity;    /* 湿度 */
-    af_gpio_t  gpio;        /* 引脚配置 */
+struct dht11_device {      /* DHT11 设备 */
+    uint8_t   data[5];     /* 接收到的数据 */
+    float     temperature; /* 温度 */
+    float     humidity;    /* 湿度 */
+    af_gpio_t gpio;        /* 引脚配置 */
 };
 
 /**

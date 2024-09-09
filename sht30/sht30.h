@@ -27,8 +27,9 @@ sht30_dev_t *sht30_open(af_i2c_t i2c, uint8_t addr);
  * @brief 关闭 sht30 设备
  *
  * @param dev  sht30 设备
+ * @return uint8_t  0: 成功，其他: 失败
  */
-void sht30_close(sht30_dev_t *dev);
+uint8_t sht30_close(sht30_dev_t *dev);
 
 /**
  * @brief 读取 sht30 数据

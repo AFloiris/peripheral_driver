@@ -116,7 +116,8 @@ static uint8_t dht11_read_bit(dht11_device_t *dev, uint8_t *value)
         dht11_delay_us(1);
         *value = dht11_wire_read(dev);
     }
-    if (retry >= 100) return 2;
+    if (retry >= 100)
+        return 2;
 
     /* 40us 后判断bit */
     dht11_delay_us(40);
@@ -135,7 +136,8 @@ static uint8_t dht11_read_byte(dht11_device_t *dev, uint8_t *value)
     for (; i < 8; i++)
     {
         ret = dht11_read_bit(dev, &bit);
-        if (ret) return ret;
+        if (ret)
+            return ret;
         *value = (*value << 1) | bit;
     }
     return 0;
@@ -180,21 +182,25 @@ uint8_t dht11_read(dht11_device_t *dev)
     uint8_t ret = 0;
     uint8_t i   = 0;
 
-    if (dev == NULL) return 1;
+    if (dev == NULL)
+        return 1;
 
     /* 复位 */
     ret = dht11_reset(dev);
-    if (ret) return 2;
+    if (ret)
+        return 2;
 
     /* 读取数据 */
     for (; i < 5; i++)
     {
         ret = dht11_read_byte(dev, &dev->data[i]);
-        if (ret) return 3;
+        if (ret)
+            return 3;
     }
 
     /* 校验数据 */
-    if (dev->data[4] != ((dev->data[0] + dev->data[1] + dev->data[2] + dev->data[3]) & 0xFF)) return 4;
+    if (dev->data[4] != ((dev->data[0] + dev->data[1] + dev->data[2] + dev->data[3]) & 0xFF))
+        return 4;
 
     /* 计算数据 */
     dev->humidity    = ((float)dev->data[0]) + ((float)dev->data[1]) / 10.0f;

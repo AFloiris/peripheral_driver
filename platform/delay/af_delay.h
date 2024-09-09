@@ -15,5 +15,4 @@ void af_delay_ms(volatile unsigned long ms);
  */
 void af_delay_us(volatile unsigned long us);
 
-
 #endif /* __AF_DELAY_H__ */
