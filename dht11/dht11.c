@@ -8,20 +8,22 @@
  * @brief 切换读取模式，读取数据
  * @note  平台相关
  */
-static uint8_t dht11_wire_read(dht11_device_t *dev)
+static uint8_t dht11_wire_read(dht11_dev_t *dev)
 {
+    uint8_t value = 0;
     if (dev->gpio.mode != AF_GPIO_MODE_INPUT)
     {
         af_gpio_set_mode(&dev->gpio, AF_GPIO_MODE_INPUT);
     }
-    return af_gpio_read(&dev->gpio);
+    af_gpio_read(&dev->gpio, &value);
+    return value;
 }
 
 /**
  * @brief 切换写入模式，输出数据
  * @note  平台相关
  */
-static void dht11_wire_write(dht11_device_t *dev, uint8_t value)
+static void dht11_wire_write(dht11_dev_t *dev, uint8_t value)
 {
     if (dev->gpio.mode != AF_GPIO_MODE_OUTPUT_PP)
     {
@@ -46,7 +48,7 @@ static void dht11_delay_ms(uint32_t ms) { af_delay_ms(ms); }
  * @brief dht11 复位
  * @note  驱动相关
  */
-static uint8_t dht11_reset(dht11_device_t *dev)
+static uint8_t dht11_reset(dht11_dev_t *dev)
 {
 
     uint8_t value = 0, retry = 0;
@@ -90,7 +92,7 @@ static uint8_t dht11_reset(dht11_device_t *dev)
  * @brief dht11 读取bit数据
  * @note  驱动相关
  */
-static uint8_t dht11_read_bit(dht11_device_t *dev, uint8_t *value)
+static uint8_t dht11_read_bit(dht11_dev_t *dev, uint8_t *value)
 {
 
     uint8_t retry = 0;
@@ -129,7 +131,7 @@ static uint8_t dht11_read_bit(dht11_device_t *dev, uint8_t *value)
  * @brief dht11 读取byte数据
  * @note  驱动相关
  */
-static uint8_t dht11_read_byte(dht11_device_t *dev, uint8_t *value)
+static uint8_t dht11_read_byte(dht11_dev_t *dev, uint8_t *value)
 {
 
     uint8_t i = 0, ret = 0, bit = 0;
@@ -143,13 +145,13 @@ static uint8_t dht11_read_byte(dht11_device_t *dev, uint8_t *value)
     return 0;
 }
 
-dht11_device_t *dht11_open(af_gpio_t gpio)
+dht11_dev_t *dht11_open(af_gpio_t gpio)
 {
 
-    dht11_device_t *dev = malloc(sizeof(dht11_device_t));
+    dht11_dev_t *dev = malloc(sizeof(dht11_dev_t));
     if (dev != NULL)
     {
-        memset(dev, 0, sizeof(dht11_device_t));
+        memset(dev, 0, sizeof(dht11_dev_t));
         dev->gpio = gpio;
     }
     if (dev->gpio.init == 0)
@@ -159,7 +161,7 @@ dht11_device_t *dht11_open(af_gpio_t gpio)
     return dev;
 }
 
-void dht11_close(dht11_device_t *dev)
+void dht11_close(dht11_dev_t *dev)
 {
 
     if (dev == NULL)
@@ -172,11 +174,11 @@ void dht11_close(dht11_device_t *dev)
         af_gpio_deinit(&dev->gpio);
     }
 
-    memset(dev, 0, sizeof(dht11_device_t));
+    memset(dev, 0, sizeof(dht11_dev_t));
     free(dev);
 }
 
-uint8_t dht11_read(dht11_device_t *dev)
+uint8_t dht11_read(dht11_dev_t *dev)
 {
 
     uint8_t ret = 0;
