@@ -42,7 +42,7 @@ static uint32_t af_gpio_pull_to_hal(af_gpio_pull_t pull)
     return hal_pull;
 }
 
-void af_gpio_init(af_gpio_t *gpio)
+uint8_t af_gpio_init(af_gpio_t *gpio)
 {
     uint32_t mode = 0;
     uint32_t pull = 0;
@@ -56,17 +56,21 @@ void af_gpio_init(af_gpio_t *gpio)
     gpio->gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(gpio->port, &gpio->gpio_init);
     gpio->init = 1;
+
+    return 0;
 }
 
-void af_gpio_deinit(af_gpio_t *gpio)
+uint8_t af_gpio_deinit(af_gpio_t *gpio)
 {
     HAL_GPIO_DeInit(gpio->port, gpio->pin);
     gpio->init = 0;
+
+    return 0;
 }
 
 void af_gpio_set_mode(af_gpio_t *gpio, af_gpio_mode_t mode)
 {
-    uint32_t hal_mode      = af_gpio_mode_to_hal(mode);
+    uint32_t hal_mode    = af_gpio_mode_to_hal(mode);
     gpio->gpio_init.Mode = hal_mode;
     HAL_GPIO_Init(gpio->port, &gpio->gpio_init);
     gpio->mode = mode;

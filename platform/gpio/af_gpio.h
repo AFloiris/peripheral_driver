@@ -33,7 +33,7 @@ struct af_gpio {
     af_gpio_speed_t speed; /* gpio 速度 */
 
 #if defined(USE_HAL_DRIVER) || defined(USE_STDPERIPH_DRIVER) /* STM32 系列 HAL库/标准库 */
-    GPIO_TypeDef    *port;
+    GPIO_TypeDef *   port;
     uint16_t         pin;
     GPIO_InitTypeDef gpio_init;
 #endif
@@ -44,14 +44,14 @@ struct af_gpio {
  *
  * @param gpio gpio 句柄
  */
-void af_gpio_init(af_gpio_t *gpio);
+uint8_t af_gpio_init(af_gpio_t *gpio);
 
 /**
  * @brief gpio 反初始化
  *
  * @param gpio gpio 句柄
  */
-void af_gpio_deinit(af_gpio_t *gpio);
+uint8_t af_gpio_deinit(af_gpio_t *gpio);
 
 /**
  * @brief 设置 gpio 模式
