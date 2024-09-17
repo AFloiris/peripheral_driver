@@ -81,15 +81,14 @@ sht30_dev_t *sht30_open(af_i2c_t i2c, uint8_t addr)
     return dev;
 }
 
-uint8_t sht30_close(sht30_dev_t *dev)
+void sht30_close(sht30_dev_t *dev)
 {
     if (dev == NULL)
-        return 1;
+        return;
 
-    uint8_t ret = af_i2c_deinit(&dev->i2c);
+    af_i2c_init(&dev->i2c);
     memset(dev, 0, sizeof(sht30_dev_t));
     free(dev);
-    return ret;
 }
 
 uint8_t sht30_read(sht30_dev_t *dev)
