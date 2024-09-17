@@ -1,7 +1,9 @@
 #ifndef __AF_GPIO_H__
 #define __AF_GPIO_H__
 
-#include "main.h"
+#include <stdint.h>
+
+#include "stm32f4xx_hal.h" /* STM32F4xx HAL */
 
 typedef struct af_gpio     af_gpio_t;
 typedef enum af_gpio_mode  af_gpio_mode_t;
@@ -33,7 +35,7 @@ struct af_gpio {
     af_gpio_speed_t speed; /* gpio 速度 */
 
 #if defined(USE_HAL_DRIVER) || defined(USE_STDPERIPH_DRIVER) /* STM32 系列 HAL库/标准库 */
-    GPIO_TypeDef *   port;
+    GPIO_TypeDef    *port;
     uint16_t         pin;
     GPIO_InitTypeDef gpio_init;
 #endif
@@ -43,6 +45,7 @@ struct af_gpio {
  * @brief gpio 初始化
  *
  * @param gpio gpio 句柄
+ * @return uint8_t 0: 成功, 其他: 失败
  */
 uint8_t af_gpio_init(af_gpio_t *gpio);
 
@@ -51,30 +54,33 @@ uint8_t af_gpio_init(af_gpio_t *gpio);
  *
  * @param gpio gpio 句柄
  */
-uint8_t af_gpio_deinit(af_gpio_t *gpio);
+void af_gpio_deinit(af_gpio_t *gpio);
 
 /**
  * @brief 设置 gpio 模式
  *
  * @param gpio gpio 句柄
  * @param mode gpio 模式
+ * @return uint8_t 0: 成功, 其他: 失败
  */
-void af_gpio_set_mode(af_gpio_t *gpio, af_gpio_mode_t mode);
+uint8_t af_gpio_set_mode(af_gpio_t *gpio, af_gpio_mode_t mode);
 
 /**
  * @brief 读取 gpio 状态
  *
  * @param gpio gpio 句柄
- * @return uint8_t gpio 状态
+ * @param value gpio 状态
+ * @return uint8_t 0: 成功, 其他: 失败
  */
-uint8_t af_gpio_read(af_gpio_t *gpio);
+uint8_t af_gpio_read(af_gpio_t *gpio, uint8_t *value);
 
 /**
  * @brief 设置 gpio 状态
  *
  * @param gpio  gpio 句柄
  * @param value gpio 状态
+ * @return uint8_t 0: 成功, 其他: 失败
  */
-void af_gpio_write(af_gpio_t *gpio, uint8_t value);
+uint8_t af_gpio_write(af_gpio_t *gpio, uint8_t value);
 
 #endif /* __AF_GPIO_H__ */

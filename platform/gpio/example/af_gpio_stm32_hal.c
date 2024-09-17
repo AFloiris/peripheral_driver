@@ -56,26 +56,32 @@ uint8_t af_gpio_init(af_gpio_t *gpio)
     gpio->gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(gpio->port, &gpio->gpio_init);
     gpio->init = 1;
-
     return 0;
 }
 
-uint8_t af_gpio_deinit(af_gpio_t *gpio)
+void af_gpio_deinit(af_gpio_t *gpio)
 {
     HAL_GPIO_DeInit(gpio->port, gpio->pin);
     gpio->init = 0;
-
-    return 0;
 }
 
-void af_gpio_set_mode(af_gpio_t *gpio, af_gpio_mode_t mode)
+uint8_t af_gpio_set_mode(af_gpio_t *gpio, af_gpio_mode_t mode)
 {
     uint32_t hal_mode    = af_gpio_mode_to_hal(mode);
     gpio->gpio_init.Mode = hal_mode;
     HAL_GPIO_Init(gpio->port, &gpio->gpio_init);
     gpio->mode = mode;
+    return 0;
 }
 
-uint8_t af_gpio_read(af_gpio_t *gpio) { return HAL_GPIO_ReadPin(gpio->port, gpio->pin); }
+uint8_t af_gpio_read(af_gpio_t *gpio, uint8_t *value)
+{
+    *value = (uint8_t)HAL_GPIO_ReadPin(gpio->port, gpio->pin);
+    return 0;
+}
 
-void af_gpio_write(af_gpio_t *gpio, uint8_t value) { HAL_GPIO_WritePin(gpio->port, gpio->pin, (GPIO_PinState)value); }
+uint8_t af_gpio_write(af_gpio_t *gpio, uint8_t value)
+{
+    HAL_GPIO_WritePin(gpio->port, gpio->pin, (GPIO_PinState)value);
+    return 0;
+}
