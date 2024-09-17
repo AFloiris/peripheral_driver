@@ -2,7 +2,7 @@
 #include "main.h"
 
 /* 全局计时变量 */
-volatile unsigned long af_time_delay;
+volatile uint32_t af_time_delay;
 
 /**
  * @brief 使用系统滴答定时器实现延时功能,注意冲突
@@ -13,7 +13,7 @@ void SysTick_Handler()
         af_time_delay--;
 }
 
-void af_delay_ms(volatile unsigned long ms)
+void af_delay_ms(uint32_t ms)
 {
     /* SYSTICK分频--1ms的系统时钟中断 */
     if (SysTick_Config(SystemCoreClock / 1000))
@@ -28,7 +28,7 @@ void af_delay_ms(volatile unsigned long ms)
     SysTick->VAL  = 0X00; /* 清空计数器 */
 }
 
-void af_delay_us(volatile unsigned long us)
+void af_delay_us(uint32_t us)
 {
     /* SYSTICK分频--1us的系统时钟中断 */
     if (SysTick_Config(SystemCoreClock / 1000000))
@@ -47,7 +47,7 @@ void af_delay_us(volatile unsigned long us)
 
 /**
 
-void a_delay_us(volatile unsigned long us) {
+void a_delay_us(uint32_t us) {
 
     uint32_t ticks;
     uint32_t told, tnow, reload, tcnt = 0;
@@ -74,7 +74,7 @@ void a_delay_us(volatile unsigned long us) {
     }
 }
 
-void a_delay_ms(volatile unsigned long ms) {
+void a_delay_ms(uint32_t ms) {
     vTaskDelay(ms);
 }
 
