@@ -1,17 +1,15 @@
 #ifndef __AF_AT24CXX_H__
 #define __AF_AT24CXX_H__
 
-#include <stdlib.h>
-#include <string.h>
+#include <stdint.h>
 
-#include "af_delay.h"
 #include "af_i2c.h"
 
-#include "main.h"
+typedef struct at24cxx_dev     at24cxx_dev_t;
+typedef enum at24cxx_type      at24cxx_type_t;
+typedef enum at24cxx_page_size at24cxx_page_size_t;
 
-typedef struct at24cxx_dev at24cxx_dev_t;
-typedef enum at24cxx_type  at24cxx_type_t;
-
+/* at24cxx 类型，每个类型对应存储空间的大小(字节) */
 enum at24cxx_type {
     AT24C01  = 128,
     AT24C02  = 256,
@@ -26,11 +24,29 @@ enum at24cxx_type {
     AT24CM01 = 131072,
     AT24CM02 = 262144,
 };
+/* at24cxx 页大小(字节) */
+enum at24cxx_page_size {
+    AT24C01_PAGE_SIZE  = 8,
+    AT24C02_PAGE_SIZE  = 8,
+    AT24C08_PAGE_SIZE  = 16,
+    AT24C16_PAGE_SIZE  = 16,
+    AT24C04_PAGE_SIZE  = 16,
+    AT24C32_PAGE_SIZE  = 32,
+    AT24C64_PAGE_SIZE  = 32,
+    AT24C128_PAGE_SIZE = 64,
+    AT24C256_PAGE_SIZE = 64,
+    AT24C512_PAGE_SIZE = 128,
+    AT24CM01_PAGE_SIZE = 256,
+    AT24CM02_PAGE_SIZE = 256,
+};
 
 struct at24cxx_dev {
-    uint8_t        addr;
-    af_i2c_t       i2c;
-    at24cxx_type_t type;
+    uint8_t             addr;      /* i2c 地址 */
+    at24cxx_type_t      type;      /* at24cxx 类型 */
+    at24cxx_page_size_t page_size; /* at24cxx 页大小 */
+
+    af_i2c_t           i2c;           /* i2c 设备 */
+    af_mem_addr_size_t mem_addr_size; /* 内存地址大小 */
 };
 
 /**
@@ -40,7 +56,7 @@ struct at24cxx_dev {
  * @param addr  i2c 地址
  * @return at24cxx_dev_t* at24cxx 设备
  */
-at24cxx_dev_t *at24cxx_open(af_i2c_t i2c, at24cxx_type_t type, uint8_t addr);
+at24cxx_dev_t *at24cxx_open(af_i2c_t i2c, uint8_t addr, at24cxx_type_t type);
 
 /**
  * @brief 关闭 at24cxx 设备
@@ -58,7 +74,7 @@ void at24cxx_close(at24cxx_dev_t *dev);
  * @param len  数据长度
  * @return uint8_t  0: 写入成功，其他: 写入失败
  */
-uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint8_t len);
+uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint32_t len);
 
 /**
  * @brief at24cxx 设备读取
@@ -69,6 +85,6 @@ uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint
  * @param len  数据长度
  * @return uint8_t  0: 读取成功，其他: 读取失败
  */
-uint8_t at24cxx_read(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint8_t len);
+uint8_t at24cxx_read(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint32_t len);
 
-#endif
+#endif /* __AF_AT24CXX_H__ */
