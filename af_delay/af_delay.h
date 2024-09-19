@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* 全局变量,用于中断延时 */
 extern volatile uint32_t af_time_delay;
 
 /**
@@ -16,5 +21,9 @@ void af_delay_ms(uint32_t ms);
  * @param us 延时时间，单位：微秒
  */
 void af_delay_us(uint32_t us);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __AF_DELAY_H__ */

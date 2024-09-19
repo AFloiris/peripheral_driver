@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 
-#include "af_i2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct at24cxx_dev     at24cxx_dev_t;
 typedef enum at24cxx_type      at24cxx_type_t;
@@ -41,12 +43,10 @@ enum at24cxx_page_size {
 };
 
 struct at24cxx_dev {
+    uint8_t             id;        /* 设备 id */
     uint8_t             addr;      /* i2c 地址 */
     at24cxx_type_t      type;      /* at24cxx 类型 */
     at24cxx_page_size_t page_size; /* at24cxx 页大小 */
-
-    af_i2c_t           i2c;           /* i2c 设备 */
-    af_mem_addr_size_t mem_addr_size; /* 内存地址大小 */
 };
 
 /**
@@ -56,14 +56,15 @@ struct at24cxx_dev {
  * @param addr  i2c 地址
  * @return at24cxx_dev_t* at24cxx 设备
  */
-at24cxx_dev_t *at24cxx_open(af_i2c_t i2c, uint8_t addr, at24cxx_type_t type);
+at24cxx_dev_t *at24cxx_open(uint8_t addr, at24cxx_type_t type);
 
 /**
  * @brief 关闭 at24cxx 设备
  *
  * @param dev  at24cxx 设备
+ * @return uint8_t  0: 成功,其他: 失败
  */
-void at24cxx_close(at24cxx_dev_t *dev);
+uint8_t at24cxx_close(at24cxx_dev_t *dev);
 
 /**
  * @brief at24cxx 设备写入
@@ -74,7 +75,7 @@ void at24cxx_close(at24cxx_dev_t *dev);
  * @param len  数据长度
  * @return uint8_t  0: 写入成功，其他: 写入失败
  */
-uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint32_t len);
+uint8_t at24cxx_write(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t *data, uint16_t len);
 
 /**
  * @brief at24cxx 设备读取
@@ -85,6 +86,10 @@ uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint
  * @param len  数据长度
  * @return uint8_t  0: 读取成功，其他: 读取失败
  */
-uint8_t at24cxx_read(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint32_t len);
+uint8_t at24cxx_read(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t *data, uint16_t len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __AF_AT24CXX_H__ */

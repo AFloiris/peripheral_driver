@@ -1,38 +1,45 @@
 #ifndef __AF_DHT11_H__
 #define __AF_DHT11_H__
 
-#include "af_gpio.h"
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct dht11_dev dht11_dev_t;
 
-struct dht11_dev {      /* DHT11 设备 */
-    uint8_t   data[5];     /* 接收到的数据 */
-    float     temperature; /* 温度 */
-    float     humidity;    /* 湿度 */
-    af_gpio_t gpio;        /* 引脚配置 */
+struct dht11_dev {       /* dht11 设备 */
+    uint8_t id;          /* 设备 id */
+    uint8_t data[5];     /* 原始数据 */
+    float   temperature; /* 温度 */
+    float   humidity;    /* 湿度 */
 };
 
 /**
- * @brief 打开 DHT11 设备
+ * @brief 打开 dht11 设备
  *
- * @param gpio DHT11 引脚配置
- * @return dht11_dev_t* DHT11 设备
+ * @return dht11_dev_t* dht11 设备
  */
-dht11_dev_t *dht11_open(af_gpio_t gpio);
+dht11_dev_t *dht11_open(void);
 
 /**
- * @brief 关闭 DHT11 设备
+ * @brief 关闭 dht11 设备
  *
- * @param dev DHT11 设备
+ * @param dev dht11 设备
  */
-void dht11_close(dht11_dev_t *dev);
+uint8_t dht11_close(dht11_dev_t *dev);
 
 /**
- * @brief 读取 DHT11 数据
+ * @brief 读取 dht11 数据
  *
- * @param dev DHT11 设备
- * @return uint8_t 0: 读取成功; 其他: 读取失败
+ * @param dev dht11 设备
+ * @return uint8_t 0: 成功; 其他: 失败
  */
 uint8_t dht11_read(dht11_dev_t *dev);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __AF_DHT11_H__ */

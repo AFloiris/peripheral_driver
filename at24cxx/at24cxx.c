@@ -1,8 +1,20 @@
 #include "at24cxx.h"
+#include "at24cxx_platform.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "af_delay.h"
+/**
+ * @brief 初始化
+ * @note  平台相关
+ */
+static uint8_t at24cxx_init(at24cxx_dev_t *dev) { return at24cxx_platform_init(dev); }
+
+/**
+ * @brief 反初始化
+ * @note  平台相关
+ */
+static uint8_t at24cxx_deinit(at24cxx_dev_t *dev) { return at24cxx_platform_deinit(dev); }
 
 /**
  * @brief at24cxx i2c 写入
@@ -17,7 +29,11 @@
  */
 static uint8_t at24cxx_i2c_write(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t *data, uint16_t len)
 {
-    return af_i2c_mem_write(&dev->i2c, dev->addr << 1 | 0x00, mem_addr, dev->mem_addr_size, data, len);
+    if (dev->type >= AT24C64)
+    {
+        return at24cxx_platform_i2c_write_addr16(dev, dev->addr, mem_addr, data, len);
+    }
+    return at24cxx_platform_i2c_write(dev, dev->addr, mem_addr & 0xff, data, len);
 }
 
 /**
@@ -33,17 +49,18 @@ static uint8_t at24cxx_i2c_write(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t 
  */
 static uint8_t at24cxx_i2c_read(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t *data, uint16_t len)
 {
-    return af_i2c_mem_read(&dev->i2c, dev->addr << 1 | 0x00, mem_addr, dev->mem_addr_size, data, len);
+    if (dev->type >= AT24C64)
+    {
+        return at24cxx_platform_i2c_read_addr16(dev, dev->addr, mem_addr, data, len);
+    }
+    return at24cxx_platform_i2c_read(dev, dev->addr, mem_addr & 0xff, data, len);
 }
 
 /**
  * @brief 延时函数
- *
- * @param ms 毫秒数
- *
  * @note 平台相关
  */
-static void at24cxx_delay_ms(uint32_t ms) { af_delay_ms(ms); }
+static void at24cxx_delay_ms(uint32_t ms) { at24cxx_platform_delay_ms(ms); }
 
 /**
  * @brief 获取页大小
@@ -77,24 +94,22 @@ static at24cxx_page_size_t at24cxx_get_page_size(at24cxx_type_t type)
     case AT24CM02:
         return AT24CM02_PAGE_SIZE;
     default:
-        return 0;
+        return AT24C01_PAGE_SIZE;
     }
 }
 
-at24cxx_dev_t *at24cxx_open(af_i2c_t i2c, uint8_t addr, at24cxx_type_t type)
+at24cxx_dev_t *at24cxx_open(uint8_t addr, at24cxx_type_t type)
 {
     at24cxx_dev_t *dev = (at24cxx_dev_t *)malloc(sizeof(at24cxx_dev_t));
     if (dev == NULL)
         return NULL;
 
     memset(dev, 0, sizeof(at24cxx_dev_t));
-    dev->i2c           = i2c;
-    dev->type          = type;
-    dev->addr          = addr;
-    dev->page_size     = at24cxx_get_page_size(type);
-    dev->mem_addr_size = type > AT24C32 ? AF_MEM_ADDR_SIZE_16BIT : AF_MEM_ADDR_SIZE_8BIT;
+    dev->type      = type;
+    dev->addr      = addr;
+    dev->page_size = at24cxx_get_page_size(type);
 
-    if (dev->i2c.init == 0 && (af_i2c_init(&dev->i2c)) != 0)
+    if (at24cxx_init(dev) != 0)
     {
         free(dev);
         return NULL;
@@ -102,17 +117,20 @@ at24cxx_dev_t *at24cxx_open(af_i2c_t i2c, uint8_t addr, at24cxx_type_t type)
     return dev;
 }
 
-void at24cxx_close(at24cxx_dev_t *dev)
+uint8_t at24cxx_close(at24cxx_dev_t *dev)
 {
     if (dev == NULL)
-        return;
+        return 1;
 
-    af_i2c_deinit(&dev->i2c);
+    if (at24cxx_deinit(dev) != 0)
+        return 2;
+
     memset(dev, 0, sizeof(at24cxx_dev_t));
     free(dev);
+    return 0;
 }
 
-uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint32_t len)
+uint8_t at24cxx_write(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t *data, uint16_t len)
 {
     if (dev == NULL)
         return 1;
@@ -158,7 +176,7 @@ uint8_t at24cxx_write(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint
     return 0;
 }
 
-uint8_t at24cxx_read(at24cxx_dev_t *dev, uint32_t mem_addr, uint8_t *data, uint32_t len)
+uint8_t at24cxx_read(at24cxx_dev_t *dev, uint16_t mem_addr, uint8_t *data, uint16_t len)
 {
     if (dev == NULL)
         return 1;
