@@ -46,3 +46,21 @@ void sht30_test(void)
     sht30_close(dev);
 }
 ```
+
+运行结果
+```
+# RECV ASCII/85 <<<
+[1] raw [108] [97] [234] [200] [34] [248]
+[1] humidity: 78.18
+[1] temperature: 29.09
+
+# RECV ASCII/86 <<<
+[2] raw [108] [97] [234] [199] [101] [203]
+[2] humidity: 77.89
+[2] temperature: 29.09
+
+# RECV ASCII/86 <<<
+[3] raw [108] [103] [76] [198] [203] [220]
+[3] humidity: 77.65
+[3] temperature: 29.10
+```
