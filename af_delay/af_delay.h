@@ -7,9 +7,6 @@
 extern "C" {
 #endif
 
-/* 全局变量,用于中断延时 */
-extern volatile uint32_t af_time_delay;
-
 /**
  * @brief 毫秒级延时函数
  * @param ms 延时时间，单位：毫秒
