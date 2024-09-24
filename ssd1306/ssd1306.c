@@ -43,10 +43,27 @@
 #define SSD1306_CMD_COMH_DESLECT_LEVEL               0xDB /* COMH去选择级别 */
 #define SSD1306_CMD_NOP                              0xE3 /* NOP */
 
+/**
+ * @brief 初始化
+ * @note  平台相关
+ */
 static uint8_t ssd1306_init(ssd1306_dev_t *dev) { return ssd1306_platform_init(dev); };
 
+/**
+ * @brief 反初始化
+ * @note  平台相关
+ */
 static uint8_t ssd1306_deinit(ssd1306_dev_t *dev) { return ssd1306_platform_deinit(dev); }
 
+/**
+ * @brief ssd1306 向gram写入数据
+ *
+ * @param dev ssd1306设备
+ * @param data 数据
+ * @param len  数据长度
+ * @return uint8_t 0: 成功, 其他: 失败
+ * @note  平台相关, 根据dev->interface选择不同接口的写数据函数
+ */
 static uint8_t ssd1306_write_data(ssd1306_dev_t *dev, uint8_t *data, uint16_t len)
 {
     if (dev->interface == SSD1306_INTERFACE_I2C)
@@ -60,6 +77,14 @@ static uint8_t ssd1306_write_data(ssd1306_dev_t *dev, uint8_t *data, uint16_t le
     return 1;
 }
 
+/**
+ * @brief ssd1306 写命令
+ *
+ * @param dev ssd1306设备
+ * @param cmd 命令
+ * @return uint8_t 0: 成功, 其他: 失败
+ * @note  平台相关, 根据dev->interface选择不同接口的写命令函数
+ */
 static uint8_t ssd1306_write_cmd(ssd1306_dev_t *dev, uint8_t cmd)
 {
     if (dev->interface == SSD1306_INTERFACE_I2C)
@@ -265,30 +290,31 @@ uint8_t ssd1306_gram_write_point(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8
 uint8_t ssd1306_gram_write_char(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_t ch, ssd1306_font_t font,
                                 uint8_t color)
 {
-    // 确保字符不会超出显示区域
-    if (x >= dev->width || y >= dev->height || x + font.width > dev->width || y + font.height > dev->height)
-    {
-        return 1; // 返回错误代码1，表示超出范围
-    }
+    const uint8_t *data = font.data + (ch - font.start) * font.size;
+    uint8_t        row, col, point, byte, bit;
 
-    const uint8_t *data = font.data + (ch - 32) * font.size;
-    /* data为列行式, 考虑18x16的字体 */
-    for (uint8_t i = 0; i < font.height / 8; i++) /* 遍历字体的每一行 */
+    if (dev == NULL || x >= dev->width || y >= dev->height || ch < font.start || ch > font.end)
+        return 1;
+
+    for (row = 0; row < font.height / 8; row++) /* 遍历字体的每一行 */
     {
-        for (uint8_t j = 0; j < font.width; j++) /* 遍历字体的每一列 */
+        if (y + row * 8 >= dev->height)
+            break;
+        for (col = 0; col < font.width; col++) /* 遍历字体的每一列 */
         {
-            uint8_t byte = data[i * font.width + j];
-            for (uint8_t k = 0; k < 8; k++) /* 遍历字体的每一字节 */
+            if (x + col >= dev->width)
+                break;
+            byte = data[row * font.width + col];
+            for (point = 0; point < 8; point++) /* 遍历字体的每一字节 */
             {
-                uint8_t bit = (byte >> k) & 0x01;
-                uint8_t x_  = x + j;
-                uint8_t y_  = y + i * 8 + k;
-                ssd1306_gram_write_point(dev, x_, y_, bit ? color : !color);
+                bit = byte & 0x01;
+                ssd1306_gram_write_point(dev, x + col, y + row * 8 + point, bit ? color : 0);
+                byte >>= 1;
             }
         }
     }
 
-    return 0; // 正常返回
+    return 0;
 }
 
 uint8_t ssd1306_gram_write_string(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_t *str, uint8_t len,

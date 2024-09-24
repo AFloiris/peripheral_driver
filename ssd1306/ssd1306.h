@@ -4,7 +4,6 @@
 #include "ssd1306_font.h"
 #include <stdint.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,6 +60,27 @@ uint8_t ssd1306_reset(ssd1306_dev_t *dev);
 uint8_t ssd1306_clear(ssd1306_dev_t *dev, uint8_t color);
 
 /**
+ * @brief 设置光标位置
+ *
+ * @param dev ssd1306 设备
+ * @param x   x 坐标
+ * @param y   y 坐标
+ * @return uint8_t 0: 成功; 其他: 失败
+ */
+uint8_t ssd1306_set_cursor(ssd1306_dev_t *dev, uint8_t x, uint8_t y);
+
+/**
+ * @brief 写入一个点
+ *
+ * @param dev   ssd1306 设备
+ * @param x     x 坐标
+ * @param y     y 坐标
+ * @param color 颜色
+ * @return uint8_t 0: 成功; 其他: 失败
+ */
+uint8_t ssd1306_write_point(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_t color);
+
+/**
  * @brief 更新显示缓存
  *
  * @param dev ssd1306 设备
@@ -89,6 +109,8 @@ uint8_t ssd1306_gram_write_point(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8
  * @param font  字体
  * @param color 颜色
  * @return uint8_t 0: 成功; 其他: 失败
+ *
+ * @note ascii 字符直接传编码值, 其他(如汉字)字符传点阵数组索引值
  */
 uint8_t ssd1306_gram_write_char(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_t ch, ssd1306_font_t font,
                                 uint8_t color);
@@ -103,6 +125,8 @@ uint8_t ssd1306_gram_write_char(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_
  * @param font  字体
  * @param color 颜色
  * @return uint8_t 0: 成功; 其他: 失败
+ *
+ * @note ascii 字符串直接传编码值数组, 其他(如汉字)字符串传点阵数组索引值数组
  */
 uint8_t ssd1306_gram_write_string(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_t *str, uint8_t len,
                                   ssd1306_font_t font, uint8_t color);

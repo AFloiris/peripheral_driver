@@ -19,3 +19,14 @@ uint8_t ssd1306_platform_i2c_read(ssd1306_dev_t *dev, uint8_t addr, uint8_t mem_
 {
     return HAL_I2C_Mem_Read(&hi2c1, addr, mem_addr, I2C_MEMADD_SIZE_8BIT, data, len, 1000);
 }
+
+uint8_t ssd1306_platform_spi_write(ssd1306_dev_t *dev, uint8_t *data, uint16_t len)
+{
+    // todo
+    return 0;
+}
+uint8_t ssd1306_platform_spi_read(ssd1306_dev_t *dev, uint8_t *data, uint16_t len)
+{
+    // todo
+    return 0;
+}
