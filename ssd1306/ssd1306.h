@@ -31,6 +31,7 @@ struct ssd1306_dev {
  * @param width     宽度
  * @param height    高度
  * @param interface 接口类型
+ * @param i2c_addr  i2c 地址
  * @return ssd1306_dev_t* ssd1306 设备
  */
 ssd1306_dev_t *ssd1306_open(uint8_t width, uint8_t height, ssd1306_interface_t interface, uint8_t i2c_addr);
@@ -54,7 +55,8 @@ uint8_t ssd1306_reset(ssd1306_dev_t *dev);
 /**
  * @brief 清除屏幕,同时清除gram
  *
- * @param dev ssd1306 设备
+ * @param dev   ssd1306 设备
+ * @param color 颜色
  * @return uint8_t 0: 成功; 其他: 失败
  */
 uint8_t ssd1306_clear(ssd1306_dev_t *dev, uint8_t color);
@@ -122,6 +124,7 @@ uint8_t ssd1306_gram_write_char(ssd1306_dev_t *dev, uint8_t x, uint8_t y, uint8_
  * @param x     x 坐标
  * @param y     y 坐标
  * @param str   字符串
+ * @param len   字符串长度
  * @param font  字体
  * @param color 颜色
  * @return uint8_t 0: 成功; 其他: 失败

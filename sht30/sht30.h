@@ -20,7 +20,6 @@ struct sht30_dev {
 /**
  * @brief 打开 sht30 设备
  *
- * @param i2c   i2c 配置
  * @param addr  i2c 地址
  * @return sht30_dev_t* sht30 设备
  */

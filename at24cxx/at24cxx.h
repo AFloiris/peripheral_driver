@@ -52,8 +52,8 @@ struct at24cxx_dev {
 /**
  * @brief 打开 at24cxx 设备
  *
- * @param i2c   i2c 配置
  * @param addr  i2c 地址
+ * @param type  at24cxx 类型
  * @return at24cxx_dev_t* at24cxx 设备
  */
 at24cxx_dev_t *at24cxx_open(uint8_t addr, at24cxx_type_t type);
