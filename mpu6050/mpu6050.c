@@ -30,6 +30,16 @@
 #define MPU6050_REG_WHO_AM_I     0x75 /* IIC地址寄存器(默认数值0x68，只读)*/
 #define MPU6050_REG_SlaveAddress 0xD0 /* IIC写入时的地址字节数据，+1为读取*/
 
+#define MPU6050_AFS_2G  16384.0 /* 加速度计算相关系数*/
+#define MPU6050_AFS_4G  8192.0
+#define MPU6050_AFS_8G  4096.0
+#define MPU6050_AFS_16G 2048.0
+
+#define MPU6050_GFS_250DPS  131.0 /* 角速度计算相关系数*/
+#define MPU6050_GFS_500DPS  65.5
+#define MPU6050_GFS_1000DPS 32.8
+#define MPU6050_GFS_2000DPS 16.4
+
 /**
  * @brief 初始化
  * @note  平台相关
@@ -73,19 +83,7 @@ static uint8_t mpu6050_reg_read(mpu6050_dev_t *dev, uint8_t reg_addr, uint8_t *d
     return mpu6050_platform_i2c_read(dev, (dev->i2c_addr << 1) | 0x01, reg_addr, data, len);
 }
 
-uint8_t mpu6050_exit_sleep(mpu6050_dev_t *dev)
-{
-    uint8_t data = 0;
-    mpu6050_reg_read(dev, MPU6050_REG_PWR_MGMT_1, &data, 1);
-    if ((data | ~(1 << 6)) != 0xFF)
-        return 0;
-
-    mpu6050_reg_write(dev, MPU6050_REG_PWR_MGMT_1, data & (~(1 << 6)));
-
-    return 0;
-}
-
-void mpu6050_start_cmd(mpu6050_dev_t *dev)
+static void mpu6050_start_cmd(mpu6050_dev_t *dev)
 {
     /* 退出睡眠模式，选择陀螺仪时钟 */
     mpu6050_reg_write(dev, MPU6050_REG_PWR_MGMT_1, 0x01);
@@ -99,21 +97,60 @@ void mpu6050_start_cmd(mpu6050_dev_t *dev)
     /* 滤波参数最大 */
     mpu6050_reg_write(dev, MPU6050_REG_CONFIG, 0x06);
 
-    /* 陀螺仪最大量程 */
-    mpu6050_reg_write(dev, MPU6050_REG_GYRO_CONFIG, 0x18);
+    /* 设置陀螺仪量程 */
+    mpu6050_reg_write(dev, MPU6050_REG_GYRO_CONFIG, 0x00 | (dev->gyro_range << 3));
 
-    /* 加速度计最大量程 */
-    mpu6050_reg_write(dev, MPU6050_REG_ACCEL_CONFIG, 0x18);
+    /* 设置加速度计量程 */
+    mpu6050_reg_write(dev, MPU6050_REG_ACCEL_CONFIG, 0x00 | (dev->accel_range << 3));
 }
 
-mpu6050_dev_t *mpu6050_open(uint8_t i2c_addr)
+static float mpu6050_calc_accel(int16_t raw_value, uint8_t accel_range)
 {
+    switch (accel_range)
+    {
+    case 0x00:
+        return raw_value / MPU6050_AFS_2G;
+    case 0x01:
+        return raw_value / MPU6050_AFS_4G;
+    case 0x02:
+        return raw_value / MPU6050_AFS_8G;
+    case 0x03:
+        return raw_value / MPU6050_AFS_16G;
+    default:
+        return raw_value / MPU6050_AFS_16G;
+    }
+}
+
+static float mpu6050_calc_gyro(int16_t raw_value, uint8_t gyro_range)
+{
+    switch (gyro_range)
+    {
+    case 0x00:
+        return raw_value / MPU6050_GFS_250DPS;
+    case 0x01:
+        return raw_value / MPU6050_GFS_500DPS;
+    case 0x02:
+        return raw_value / MPU6050_GFS_1000DPS;
+    case 0x03:
+        return raw_value / MPU6050_GFS_2000DPS;
+    default:
+        return raw_value / MPU6050_GFS_2000DPS;
+    }
+}
+
+mpu6050_dev_t *mpu6050_open(uint8_t accel_range, uint8_t gyro_range, uint8_t i2c_addr)
+{
+    if (accel_range > 0x03 || gyro_range > 0x03)
+        return NULL;
+
     mpu6050_dev_t *dev = (mpu6050_dev_t *)malloc(sizeof(mpu6050_dev_t));
     if (dev == NULL)
         return NULL;
 
     memset(dev, 0, sizeof(mpu6050_dev_t));
-    dev->i2c_addr = i2c_addr;
+    dev->accel_range = accel_range;
+    dev->gyro_range  = gyro_range;
+    dev->i2c_addr    = i2c_addr;
 
     if (mpu6050_init(dev))
     {
@@ -139,24 +176,53 @@ uint8_t mpu6050_close(mpu6050_dev_t *dev)
     return 0;
 }
 
-uint8_t mpu6050_read(mpu6050_dev_t *dev)
+uint8_t mpu6050_get_id(mpu6050_dev_t *dev, uint8_t *id)
 {
     if (dev == NULL)
         return 1;
 
-    uint8_t ret      = 0;
-    uint8_t data[14] = {0};
-
-    ret = mpu6050_reg_read(dev, MPU6050_REG_ACCEL_X_H, data, 14);
+    uint8_t ret;
+    ret = mpu6050_reg_read(dev, MPU6050_REG_WHO_AM_I, id, 1);
     if (ret)
         return 2;
 
-    dev->x_accel = (int16_t)(data[0] << 8 | data[1]);
-    dev->y_accel = (int16_t)(data[2] << 8 | data[3]);
-    dev->z_accel = (int16_t)(data[4] << 8 | data[5]);
-    // dev->temp    = (int16_t)(data[6] << 8 | data[7]);
-    dev->x_gyro = (int16_t)(data[8] << 8 | data[9]);
-    dev->y_gyro = (int16_t)(data[10] << 8 | data[11]);
-    dev->z_gyro = (int16_t)(data[12] << 8 | data[13]);
+    return 0;
+}
+
+uint8_t mpu6050_read_data(mpu6050_dev_t *dev)
+{
+    if (dev == NULL)
+        return 1;
+
+    uint8_t  ret = 0;
+    uint16_t temp_data;
+
+    ret = mpu6050_reg_read(dev, MPU6050_REG_ACCEL_X_H, dev->raw_data, 14);
+    if (ret)
+        return 2;
+
+    /* 处理加速度计数据 */
+    temp_data    = (int16_t)(dev->raw_data[0] << 8 | dev->raw_data[1]);
+    dev->x_accel = mpu6050_calc_accel(temp_data, dev->accel_range);
+
+    temp_data    = (int16_t)(dev->raw_data[2] << 8 | dev->raw_data[3]);
+    dev->y_accel = mpu6050_calc_accel(temp_data, dev->accel_range);
+
+    temp_data    = (int16_t)(dev->raw_data[4] << 8 | dev->raw_data[5]);
+    dev->z_accel = mpu6050_calc_accel(temp_data, dev->accel_range);
+
+    /* 处理温度数据 */
+    temp_data = (int16_t)(dev->raw_data[6] << 8 | dev->raw_data[7]);
+    dev->temp = (float)temp_data / 340.0f + 36.53;
+
+    /* 处理陀螺仪数据 */
+    temp_data   = (int16_t)(dev->raw_data[8] << 8 | dev->raw_data[9]);
+    dev->x_gyro = mpu6050_calc_gyro(temp_data, dev->gyro_range);
+
+    temp_data   = (int16_t)(dev->raw_data[10] << 8 | dev->raw_data[11]);
+    dev->y_gyro = mpu6050_calc_gyro(temp_data, dev->gyro_range);
+
+    temp_data   = (int16_t)(dev->raw_data[12] << 8 | dev->raw_data[13]);
+    dev->z_gyro = mpu6050_calc_gyro(temp_data, dev->gyro_range);
     return 0;
 }
