@@ -10,7 +10,7 @@
 * GPIOD15
 * DHT11
 
-1. 移植 `dht11.c` `dht11.h` `dht11_platform.h` `dht11_platform_stm32_hal.c` 到工程目录下, `af_delay.h` `af_delay_platform_stm32_systick.c` 可选
+1. 移植 `dht11.c` `dht11.h` `dht11_platform.h` `dht11_platform_stm32_hal.c` 到工程目录下, `af_delay.h` `af_delay_platform_stm32_hal.c` 可选
 2. 根据实际情况修改 `dht11_platform_stm32_hal.c` 中的函数
 3. 在 `main.c` 中调用 `dht11_test()` 函数
 
