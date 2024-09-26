@@ -194,8 +194,8 @@ uint8_t mpu6050_read_data(mpu6050_dev_t *dev)
     if (dev == NULL)
         return 1;
 
-    uint8_t  ret = 0;
-    uint16_t temp_data;
+    uint8_t ret = 0;
+    int16_t temp_data;
 
     ret = mpu6050_reg_read(dev, MPU6050_REG_ACCEL_X_H, dev->raw_data, 14);
     if (ret)
@@ -213,7 +213,7 @@ uint8_t mpu6050_read_data(mpu6050_dev_t *dev)
 
     /* 处理温度数据 */
     temp_data = (int16_t)(dev->raw_data[6] << 8 | dev->raw_data[7]);
-    dev->temp = (float)temp_data / 340.0f + 36.53;
+    dev->temp = (float)temp_data / 340.0f + 36.53f;
 
     /* 处理陀螺仪数据 */
     temp_data   = (int16_t)(dev->raw_data[8] << 8 | dev->raw_data[9]);
