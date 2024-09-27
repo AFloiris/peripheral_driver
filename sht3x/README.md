@@ -13,37 +13,37 @@
 2. 根据实际情况修改 `sht30_platform_stm32_hal.c` 中的函数
 3. 在 `main.c` 中调用 `sht30_test()` 函数
 ```C
-#include "sht30.h"
+#include "sht3x.h"
 #include <stdio.h>
-void sht30_test(void)
+void sht3x_test(void)
 {
     uint8_t i   = 0;
     uint8_t ret = 0;
 
-    sht30_dev_t *dev = sht30_open(0x44);
+    sht3x_dev_t *dev = sht3x_open(0x44);
     if (dev == NULL)
     {
-        printf(" sht30 open failed\n");
+        printf(" sht3x open failed\n");
         return;
     }
 
     while (i++ < 3)
     {
-        ret = sht30_read(dev);
+        ret = sht3x_read(dev);
         if (ret)
         {
-            printf(" sht30 read failed ret : %d\n", ret);
-            sht30_close(dev);
+            printf(" sht3x read failed ret : %d\n", ret);
+            sht3x_close(dev);
             return;
         }
-        printf("[%d] raw [%d] [%d] [%d] [%d] [%d] [%d]\n", i, dev->data[0], dev->data[1], dev->data[2], dev->data[3],
-               dev->data[4], dev->data[5]);
+        printf("[%d] raw [%d] [%d] [%d] [%d] [%d] [%d]\n", i, dev->raw_data[0], dev->raw_data[1], dev->raw_data[2],
+               dev->raw_data[3], dev->raw_data[4], dev->raw_data[5]);
         printf("[%d] humidity: %.2f\n", i, dev->humidity);
         printf("[%d] temperature: %.2f\n", i, dev->temperature);
         HAL_Delay(2000);
     }
 
-    sht30_close(dev);
+    sht3x_close(dev);
 }
 ```
 
