@@ -110,8 +110,9 @@ uint8_t hc_sr04_close(hc_sr04_dev_t *dev)
 
 uint8_t hc_sr04_read(hc_sr04_dev_t *dev)
 {
-    uint8_t err  = 0;
-    uint8_t echo = 0;
+    uint8_t  err     = 0;
+    uint8_t  echo    = 0;
+    uint32_t timeout = 0;
     if (dev == NULL)
         return 1;
 
@@ -127,42 +128,53 @@ uint8_t hc_sr04_read(hc_sr04_dev_t *dev)
         return 3;
 
     /* 等待回响信号 */
+    timeout = 5000 * 1000;
+
     err = hc_sr04_echo_gpio_read(dev, &echo);
     if (err)
         return 4;
 
-    while (echo == 0)
+    while (echo == 0 && timeout > 0)
     {
+        timeout -= 10;
+        hc_sr04_delay_us(10);
         err = hc_sr04_echo_gpio_read(dev, &echo);
         if (err)
             return 5;
     }
+    if (timeout <= 0)
+        return 6;
 
     /* 开始计时 */
     err = hc_sr04_start_clock(dev);
     if (err)
-        return 6;
+        return 7;
 
     err = hc_sr04_echo_gpio_read(dev, &echo);
     if (err)
-        return 7;
+        return 8;
 
-    while (echo == 1)
+    timeout = 5000 * 1000;
+    while (echo == 1 && timeout > 0)
     {
+        timeout -= 10;
+        hc_sr04_delay_us(10);
         err = hc_sr04_echo_gpio_read(dev, &echo);
         if (err)
-            return 8;
+            return 9;
     }
+    if (timeout <= 0)
+        return 10;
 
     /* 结束计时 */
     err = hc_sr04_stop_clock(dev);
     if (err)
-        return 9;
+        return 11;
 
     /* 获取时间 */
     err = hc_sr04_get_clock_us(dev, &dev->time);
     if (err)
-        return 10;
+        return 12;
 
     /* 计算距离 */
     dev->distance = dev->time * 0.017f;
